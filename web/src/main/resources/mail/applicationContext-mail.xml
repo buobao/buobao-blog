@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd"
+       default-lazy-init="true">
+<description>Mail Service</description>
+
+    <bean id="simpleMailService" class="com.buobao.service.common.SimpleMailService">
+        <property name="mailSender" ref="mailSender"/>
+        <property name="textTemplate">
+            <value><![CDATA[
+			%s,欢迎来到骑士粉丝团，注册时间为%tF。
+			请复制下面的链接到浏览器地址栏完成邮件验证功能。
+
+			%s
+
+			【注】该邮件由系统自动发送，请勿回复!
+			]]></value>
+        </property>
+    </bean>
+
+    <bean id="mimeMailService" class="com.buobao.service.common.MimeMailService">
+        <property name="mailSender" ref="mailSender"/>
+        <property name="freemarkerConfiguration" ref="freemarkerConfiguration"/>
+    </bean>
+
+    <bean id="freemarkerConfiguration" class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean">
+        <property name="templateLoaderPath" value="classpath:/mail"/>
+    </bean>
+
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="smtp.qq.com"/>
+        <property name="username" value="1039163450@qq.com"/>
+        <property name="password" value="320683sonofaBICH"/>
+        <property name="defaultEncoding" value="UTF-8"/>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">true</prop>
+                <!--使用gmail smtp server的必须参数 -->
+                <prop key="mail.smtp.starttls.enable">true</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>

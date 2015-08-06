@@ -1,0 +1,4 @@
+NewsCrawlerTest.class
+test\SpringContextTestCase.class
+test\SpringTransactionalTestCase.class
+test\Profiles.class

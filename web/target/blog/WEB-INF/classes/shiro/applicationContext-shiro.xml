@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+    <description>shiro</description>
+
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager" />
+        <property name="loginUrl" value="jsp/com/login.jsp" />
+        <property name="successUrl" value="jsp/com/index.jsp" />
+        <property name="unauthorizedUrl" value="web/login.action" />
+        <property name="filterChainDefinitions">
+            <value>
+                web/login.action = anon
+                web/login* = anon
+                web/** = authc
+            </value>
+        </property>
+    </bean>
+
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <!--设置自定义realm-->
+        <!--<property name="realm" ref="monitorRealm" />-->
+        <property name="realm" ref="monitorRealm" />
+    </bean>
+
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+    <!--&lt;!&ndash; 使用配置文件管理 &ndash;&gt;-->
+    <!--<bean id="iniRealm" class="org.apache.shiro.realm.text.IniRealm">-->
+        <!--<property name="resourcePath" value="classpath:/shiro.ini" />-->
+    <!--</bean>-->
+
+    <bean id="monitorRealm" class="com.buobao.shiro.MonitorRealm"></bean>
+    <!-- securityManager -->
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod"
+                  value="org.apache.shiro.SecurityUtils.setSecurityManager" />
+        <property name="arguments" ref="securityManager" />
+    </bean>
+
+    <!-- Enable Shiro Annotations for Spring-configured beans.  Only run after -->
+    <!-- the lifecycleBeanProcessor has run: -->
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor"/>
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+
+    </bean>
+</beans>

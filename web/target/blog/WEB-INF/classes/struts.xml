@@ -1,0 +1,108 @@
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+    <!-- 是否显示详细错误信息 -->
+    <constant name="struts.devMode" value="true" />
+    <!-- 国际化资源文件名称 -->
+    <constant name="struts.custom.i18n.resources" value="messageResources_zh_CN" />
+    <!-- 是否自动加载国际化资源文件 -->
+    <constant name="struts.i18n.reload" value="false" />
+    <!-- convention类重新加载 -->
+    <constant name="struts.convention.classes.reload" value="false" />
+    <!-- 浏览器是否缓存静态内容 -->
+    <constant name="struts.serve.static.browserCache" value="true" />
+    <!-- 配置使用Spring管理Action -->
+    <constant name="struts.objectFactory" value="spring" />
+    <!-- 上传文件大小限制设置 2M,上传路径 -->
+    <constant name="struts.multipart.maxSize" value="2100000" />
+    <constant name="struts.multipart.saveDir" value="/tmp"></constant>
+    <!-- 主题 -->
+    <constant name="struts.ui.theme" value="simple" />
+    <!-- 编码 -->
+    <constant name="struts.i18n.encoding" value="UTF-8" />
+
+    <!-- 后缀 -->
+    <constant name="struts.action.extension" value="action" />
+    <!-- 默认包路径包含action,actions,struts,struts2的所有包都会被struts作为含有Action类的路径来搜索。
+        你可以通过设置struts.convention.package.locators属性来修改这个配置。如： -->
+    <constant name="struts.convention.package.locators" value="action" />
+    <!-- 结果资源的路径 -->
+    <constant name="struts.convention.result.path" value="/WEB-INF/jsp/" />
+    <!-- URL资源分隔符 执行该action的命令为 如果AaBbAction 则URL=aa-bb.action 方法为aa-bb!add.aciton
+        Result=aa-bb.jsp -->
+    <constant name="struts.convention.action.name.separator" value="-" />
+    <!-- 直接访问方法 感叹号方式(需要开启),官网不推荐使用这种方式,建议大家不要使用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="true"></constant>
+    <!-- strust直接访问 静态方法-->
+    <constant name="struts.ognl.allowStaticMethodAccess" value="true"></constant>
+
+
+    <package name="basePackage" extends="struts-default">
+        <interceptors>
+            <interceptor-stack name="baseStack">
+                <interceptor-ref name="exception" />
+                <interceptor-ref name="alias" />
+                <interceptor-ref name="servletConfig" />
+                <interceptor-ref name="i18n" />
+                <interceptor-ref name="prepare" />
+                <interceptor-ref name="chain" />
+                <interceptor-ref name="debugging" />
+                <interceptor-ref name="scopedModelDriven" />
+                <interceptor-ref name="modelDriven" />
+                <interceptor-ref name="fileUpload" />
+                <interceptor-ref name="checkbox" />
+                <interceptor-ref name="multiselect" />
+                <interceptor-ref name="staticParams" />
+                <interceptor-ref name="actionMappingParams" />
+                <interceptor-ref name="params">
+                    <param name="excludeParams">dojo\..*,^struts\..*</param>
+                </interceptor-ref>
+                <interceptor-ref name="conversionError" />
+                <!-- 配置方法级别的校验 -->
+                <interceptor-ref name="validation">
+                    <param name="excludeMethods">input,back,cancel,browse</param>
+                    <param name="validateAnnotatedMethodOnly">true</param>
+                </interceptor-ref>
+                <interceptor-ref name="workflow">
+                    <param name="excludeMethods">input,back,cancel,browse</param>
+                </interceptor-ref>
+                <interceptor-ref name="modelDriven">
+                    <param name="refreshModelBeforeResult">true</param>
+                </interceptor-ref>
+
+            </interceptor-stack>
+        </interceptors>
+
+        <!-- 配置默认拦截器栈 -->
+        <default-interceptor-ref name="baseStack" />
+
+
+        <!-- 未到找Action指向页面 -->
+        <default-action-ref name="errorPage" />
+        <action name="errorPage">
+            <result type="redirect">/html/error404.html</result>
+        </action>
+    </package>
+
+
+    <package name="com" extends="basePackage" namespace="/com/">
+        <interceptors>
+            <interceptor-stack name="adminStack">
+                <interceptor-ref name="baseStack" />
+                <!--<interceptor-ref name="logInterceptor" />-->
+            </interceptor-stack>
+            <!--<interceptor name="logInterceptor" class="com.xforme.activiti.core.interceptor.LogInterceptor">-->
+            <!--</interceptor>-->
+
+        </interceptors>
+
+        <!-- 配置默认拦截器栈 -->
+        <default-interceptor-ref name="adminStack" />
+        <global-results>
+            <result name="error">/html/error.jsp</result>
+            <result name="toindex" type="redirect">index.action</result>
+        </global-results>
+    </package>
+
+</struts>

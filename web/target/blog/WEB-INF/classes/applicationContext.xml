@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd  
+       http://www.springframework.org/schema/context   
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd  
+       http://www.springframework.org/schema/tx   
+       http://www.springframework.org/schema/tx/spring-tx-3.0.xsd  
+       http://www.springframework.org/schema/mvc   
+       http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd      
+       http://www.springframework.org/schema/aop  
+       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+    <description>Spring配置</description>
+
+    <!--扫描Spring Bean -->
+    <context:component-scan base-package="com.buobao.****">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+    </context:component-scan>
+    <!-- 引入数据库属性文件 -->
+    <context:property-placeholder ignore-resource-not-found="true" location="classpath*:/application.development.properties" />
+    <!--c3p0数据库连接池 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+          destroy-method="close">
+        <property name="driverClass" value="${driverClassName}" />
+        <property name="jdbcUrl" value="${jdbc_url}" />
+        <property name="user" value="${jdbc_username}" />
+        <property name="password" value="${jdbc_password}" />
+        <property name="initialPoolSize" value="1" />
+        <property name="minPoolSize" value="0" />
+        <property name="maxPoolSize" value="50" />
+        <property name="acquireIncrement" value="5" />
+        <property name="maxIdleTime" value="10" />
+        <property name="maxStatements" value="0" />
+    </bean>
+    
+    <bean id="newscheck" class="com.buobao.bean.NewsCheck">
+    </bean>
+
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <!-- 配置Hibernate拦截器,自动填充数据的插入、更新时间 -->
+        <property name="entityInterceptor" ref="entityInterceptor" />
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+                <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+                <prop key="hibernate.format_sql">${hibernate.format_sql}</prop>
+                <!--<prop key="javax.persistence.validation.mode">none</prop>
+                -->
+                <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate4.SpringSessionContext</prop>
+            </props>
+        </property>
+        <!-- 扫描entity -->
+        <property name="packagesToScan">
+            <list>
+                <value>com.buobao.entity</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- hibernate事物开始 -->
+    <bean id="transactionManager"
+          class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+          abstract="false" lazy-init="default" autowire="default">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory" />
+        </property>
+    </bean>
+
+    <!-- 注解式事物 -->
+    <!-- <tx:annotation-driven transaction-manager="hibernateTransactionManager"/> -->
+
+    <!--声明性事物 -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="store*" propagation="REQUIRED" />
+            <tx:method name="add*" propagation="REQUIRED" />
+            <tx:method name="save*" propagation="REQUIRED" />
+            <tx:method name="update*" propagation="REQUIRED" />
+            <tx:method name="delete*" propagation="REQUIRED" />
+            <tx:method name="clear*" propagation="REQUIRED" />
+            <tx:method name="get*" propagation="REQUIRED" />
+        </tx:attributes>
+    </tx:advice>
+    <aop:config>
+        <aop:pointcut id="allServiceMethod"
+                      expression="execution(* com.buobao.service.impl.*.*(..))" />
+        <aop:advisor pointcut-ref="allServiceMethod" advice-ref="txAdvice" />
+    </aop:config>
+    <!-- hibernate事物结束 -->
+
+
+    <!-- JDBC配置 -->
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource">
+            <ref bean="dataSource"/>
+        </property>
+    </bean>
+
+
+    <import resource="classpath:mongodb/applicationContext-mongodb.xml"/>
+    <import resource="classpath:quartz/applicationContext-quartz.xml"/>
+    <import resource="classpath:redis/applicationContext-redis.xml"/>
+    <import resource="classpath:shiro/applicationContext-shiro.xml"/>
+</beans>
